@@ -13,6 +13,24 @@ struct FMovementInf : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 public:
+	FMovementInf()
+	{
+		JumpPower = 700.0f;
+		WalkSpeed = 150.0f;
+		JogSpeed = 270.0f;
+		RunSpeed = 350.0f;
+		AccelTimer = 1.5f;
+	}
+
+	FMovementInf(const float JumpPower, const float WalkSpeed, const float JogSpeed, const float RunSpeed, const float AccelTimer)
+	{
+		this->JumpPower = JumpPower;
+		this->WalkSpeed = WalkSpeed;
+		this->JogSpeed = JogSpeed;
+		this->RunSpeed = RunSpeed;
+		this->AccelTimer = AccelTimer;
+	}
+
 	const float GetJumpPower() const { return JumpPower; }
 	const float GetWalkSpeed() const { return WalkSpeed; }
 	const float GetJogSpeed() const { return JogSpeed; }
@@ -24,6 +42,40 @@ public:
 	void SetJogSpeed(const float Value) { JogSpeed = Value; }
 	void SetRunSpeed(const float Value) { RunSpeed = Value; }
 	void SetAccelTimer(const float Value) { AccelTimer = Value; }
+
+	static FMovementInf Zero;
+
+	bool operator!=(FMovementInf& Other)
+	{
+		if (this->JumpPower == JumpPower)
+			return false;
+		if (this->WalkSpeed == WalkSpeed)
+			return false;
+		if (this->JogSpeed == JogSpeed)
+			return false;
+		if (this->RunSpeed == RunSpeed)
+			return false;
+		if (this->AccelTimer == AccelTimer)
+			return false;
+
+		return true;
+	}
+
+	bool operator==(FMovementInf& Other)
+	{
+		if (this->JumpPower != JumpPower)
+			return false;
+		if (this->WalkSpeed != WalkSpeed)
+			return false;
+		if (this->JogSpeed != JogSpeed)
+			return false;
+		if (this->RunSpeed != RunSpeed)
+			return false;
+		if (this->AccelTimer != AccelTimer)
+			return false;
+
+		return true;
+	}
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -74,6 +126,40 @@ public:
 	float SetAgility(const float Value) { Agility = Value; }
 	float SetDefence(const float Value) { Defence = Value; }
 
+	static FCharacterStatus Zero;
+
+	bool operator!=(FCharacterStatus& Other)
+	{
+		if (this->Health == Other.Health)
+			return false;
+		if (this->Stamina == Other.Stamina)
+			return false;
+		if (this->Strength == Other.Strength)
+			return false;
+		if (this->Agility == Other.Agility)
+			return false;
+		if (this->Defence == Other.Defence)
+			return false;
+
+		return true;
+	}
+
+	bool operator==(FCharacterStatus& Other)
+	{
+		if (this->Health != Other.Health)
+			return false;
+		if(this->Stamina != Other.Stamina)
+			return false;
+		if(this->Strength != Other.Strength)
+			return false;
+		if(this->Agility != Other.Agility)
+			return false;
+		if(this->Defence != Other.Defence)
+			return false;
+
+		return true;
+	}
+
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float Health = 100.0f;
@@ -103,15 +189,15 @@ protected:
 		uint8 TeamID = 0;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Character Status")
-		const FCharacterStatus OriginStatus;
+		FCharacterStatus Status;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Character Status")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character Status")
 		FCharacterStatus CurrentStatus;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Character Movement")
-		const FMovementInf OriginMovement;
+		FMovementInf Movement;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Character Movement")
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Character Movement")
 		FMovementInf CurrentMovement;
 
 public:
@@ -122,16 +208,35 @@ public:
 
 	const bool IsFalling() const;
 
+	void ResetMovementStatus();
+	void ResetCharacterStatus();
+
+	const uint8 GetTeamID() { return TeamID; }
+
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void OnAttack() {};
+	virtual void OnSmash() {};
+	virtual void OnEvation() {};
+
 	virtual void OnDeathEffect();
-	virtual void SetDeathState();
+	//virtual void SetDeathState();
 	virtual void Death();
 
 private:
 	FTimerDelegate MovementTimerDel;
 	FTimerHandle MovementTimerHandle;
 
-
+private:
+	/**
+	* Origin값으로 Blueprint에서 수정된 Status 값이 BeginPlay에서 할당된다.
+	* 그 외에는 변경되면 안된다.
+	*/
+	FCharacterStatus OriginStatus;
+	/**
+	* Origin값으로 Blueprint에서 수정된 Movement 값이 BeginPlay에서 할당된다.
+	* 그 외에는 변경되면 안된다.
+	*/
+	FMovementInf OriginMovement;
 };

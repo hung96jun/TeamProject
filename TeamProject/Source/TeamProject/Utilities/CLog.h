@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 
 /**
- * 
+ *
  */
 class TEAMPROJECT_API CLog
 {
